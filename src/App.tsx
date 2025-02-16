@@ -292,15 +292,15 @@ function App() {
   const trustedBrands = [
     {
       name: 'TikTok',
-      logo: '/Brand Logos/tiktok-logo.svg',
+      logo: './Brand Logos/tiktok-logo.svg',
     },
     {
       name: 'Nike',
-      logo: '/Brand Logos/nike-logo.svg',
+      logo: './Brand Logos/nike-logo.svg',
     },
     {
       name: 'Boohoo',
-      logo: '/Brand Logos/boohoo-logo.svg', // Make sure this image is in your public folder
+      logo: './Brand Logos/boohoo-logo.svg',
     }
   ];
 
@@ -312,33 +312,21 @@ function App() {
   // Update the webhook submission function
   const sendToWebhook = async (data: Partial<WebhookData>) => {
     try {
-      const webhookData: WebhookData = {
-        ...data,
-        metadata: {
-          userAgent: navigator.userAgent,
-          submissionTime: {
-            local: new Date().toString(),
-            utc: new Date().toUTCString()
-          }
-        }
-      } as WebhookData;
-
-      console.log('Sending webhook data:', JSON.stringify(webhookData, null, 2));
-
       const response = await fetch('https://hook.us2.make.com/jayb11t4hduccicghts2e351t2wf1bvi', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(webhookData)
+        body: JSON.stringify(data)
       });
-
+      
       if (!response.ok) {
-        throw new Error(`Webhook submission failed: ${response.statusText}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error sending data to webhook:', error);
-      // You might want to add error handling UI here
+      console.error('Error sending data:', error);
+      // Add fallback for failed submissions
+      localStorage.setItem('failed_submission', JSON.stringify(data));
     }
   };
 
@@ -810,60 +798,66 @@ function App() {
   };
 
   // Add a new function to handle brand contact form submission
-  const handleBrandContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleBrandContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formElement = e.currentTarget;
-    const formData = new FormData(formElement);
-
-    // Get form values
-    const contactInfo = {
-      name: formData.get('fullname') as string,
-      email: formData.get('emailaddress') as string,
-      phone: formData.get('phonenumber') as string,
-      company: formData.get('companyname') as string
-    };
-
-    // Prepare final brand data
-    const brandData = {
-      formType: 'brand',
-      submissionId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: new Date().toISOString(),
-      userInfo: contactInfo,
-      consultationData: {
-        marketingGoals: consultationData.marketingGoals || '',
-        influencerType: consultationData.influencerType || '',
-        platforms: consultationData.platforms || '',
-        budget: consultationData.budget || '',
-        industry: consultationData.industry || ''
-      }
-    };
-
-    // Send data to webhook
+    setIsLoading(true);
     try {
-      fetch('https://hook.us2.make.com/jayb11t4hduccicghts2e351t2wf1bvi', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(brandData)
-      });
+      const formElement = e.currentTarget;
+      const formData = new FormData(formElement);
+
+      // Get form values
+      const contactInfo = {
+        name: formData.get('fullname') as string,
+        email: formData.get('emailaddress') as string,
+        phone: formData.get('phonenumber') as string,
+        company: formData.get('companyname') as string
+      };
+
+      // Prepare final brand data
+      const brandData = {
+        formType: 'brand',
+        submissionId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        timestamp: new Date().toISOString(),
+        userInfo: contactInfo,
+        consultationData: {
+          marketingGoals: consultationData.marketingGoals || '',
+          influencerType: consultationData.influencerType || '',
+          platforms: consultationData.platforms || '',
+          budget: consultationData.budget || '',
+          industry: consultationData.industry || ''
+        }
+      };
+
+      // Send data to webhook
+      await sendToWebhook(brandData);
+
+      // Show thank you message
+      setMessages(prev => [...prev, {
+        text: "Thank you for sharing your information! Our team will be in touch within 24 hours to discuss your custom influencer marketing strategy. Have a great day! 🐝✨",
+        sender: 'ai',
+        timestamp: new Date()
+      }]);
+
+      // Close chat after delay
+      setTimeout(() => {
+        setShowChat(false);
+        setCurrentStep('introduction');
+      }, 3000);
     } catch (error) {
       console.error('Error sending data:', error);
+    } finally {
+      setIsLoading(false);
     }
-
-    // Show thank you message
-    setMessages(prev => [...prev, {
-      text: "Thank you for sharing your information! Our team will be in touch within 24 hours to discuss your custom influencer marketing strategy. Have a great day! 🐝✨",
-      sender: 'ai',
-      timestamp: new Date()
-    }]);
-
-    // Close chat after delay
-    setTimeout(() => {
-      setShowChat(false);
-      setCurrentStep('introduction');
-    }, 3000);
   };
+
+  useEffect(() => {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#26208a] via-[#312AB3] to-[#f34e02] overflow-x-hidden">
@@ -876,12 +870,44 @@ function App() {
           <a 
             href="/" 
             className="logo block relative group"
+            onClick={(e) => {
+              e.preventDefault();
+              // Reset all states
+              setShowForm(false);
+              setUserType(null);
+              setShowChat(false);
+              setMessages([]);
+              setCurrentStep('introduction');
+              setFormData({
+                name: '',
+                email: '',
+                phone: '',
+                company: '',
+                industry: '',
+                previousInfluencerExperience: '',
+                currentMarketingChannels: '',
+                budget: '',
+                campaignGoals: '',
+                targetAudience: '',
+                creatorPreferences: '',
+                preferredContentTypes: '',
+                brandValues: '',
+                niche: '',
+                platforms: '',
+                followers: '',
+                engagementRate: '',
+                contentTypes: '',
+                socialHandles: ''
+              });
+              // Scroll to top
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             aria-label="notmrw"
           >
             <img 
-              src="/logo.png"
+              src="./logo.png"
               alt="notmrw"
-              className="h-[100px] md:h-[120px] w-auto"
+              className="h-[140px] md:h-[160px] w-auto transform hover:scale-105 transition-all duration-300"
               loading="eager"
             />
           </a>
@@ -970,9 +996,10 @@ function App() {
 
               <button
                 type="submit"
-                className="w-full bg-[#f34e02] hover:bg-[#fd6d2b] text-white px-6 py-3 rounded-full flex items-center justify-center gap-2 transform hover:scale-105 transition-all duration-300"
+                disabled={isLoading}
+                className="w-full bg-[#f34e02] hover:bg-[#fd6d2b] text-white px-6 py-3 rounded-full flex items-center justify-center gap-2 transform hover:scale-105 transition-all duration-300 disabled:opacity-50"
               >
-                {userType === 'creator' ? 'Continue to AI Consultation' : 'Submit'} <ArrowRight size={20} />
+                {isLoading ? 'Submitting...' : (userType === 'creator' ? 'Continue to AI Consultation' : 'Submit')} <ArrowRight size={20} />
               </button>
             </form>
           </div>
@@ -1317,9 +1344,10 @@ function App() {
                     ))}
                     <button
                       type="submit"
-                      className="w-full bg-[#f34e02] hover:bg-[#fd6d2b] text-white px-4 py-2 rounded-md"
+                      disabled={isLoading}
+                      className="w-full bg-[#f34e02] hover:bg-[#fd6d2b] text-white px-4 py-2 rounded-md disabled:opacity-50"
                     >
-                      Submit
+                      {isLoading ? 'Submitting...' : 'Submit'}
                     </button>
                   </form>
                 )}

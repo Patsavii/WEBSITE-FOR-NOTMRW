@@ -1016,11 +1016,12 @@ function App() {
       )}
 
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center justify-center px-4 pt-20">
+      <div className="min-h-[100vh] relative overflow-hidden flex items-center justify-center py-32 md:py-24">
         <div className="absolute inset-0 bg-[#26208a]/30 backdrop-blur-sm"
-             style={{ transform: `translateY(${scrollY * 0.5}px)` }}></div>
-        <div className="relative z-10 max-w-6xl mx-auto text-center animate-on-scroll">
-          <h1 className="text-6xl font-bold text-white mb-6 animate-on-scroll">
+             style={{ transform: `translateY(${scrollY * 0.5}px)` }}>
+        </div>
+        <div className="relative z-10 max-w-6xl mx-auto text-center animate-on-scroll px-4">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-on-scroll pt-20">
             AI-Powered Creator Marketing
             <span className="block text-[#fd6d2b]">That Delivers Results</span>
           </h1>
@@ -1051,21 +1052,21 @@ function App() {
         <h3 className="text-center text-[#f5f4f4] text-2xl mb-12 animate-on-scroll font-bold">
           Trusted by Leading Brands
         </h3>
-        <div ref={trustScroll} className="flex gap-16 whitespace-nowrap overflow-hidden relative z-0 px-8">
+        <div ref={trustScroll} className="flex gap-8 md:gap-16 whitespace-nowrap overflow-hidden relative z-0 px-4 md:px-8">
           {[...trustedBrands, ...trustedBrands].map((brand, i) => (
             <div 
               key={i} 
-              className="flex-shrink-0 bg-gradient-to-br from-white/5 to-white/10 px-12 py-8 rounded-xl backdrop-blur-md border border-white/10 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-white/20 flex items-center justify-center"
+              className="flex-shrink-0 bg-white/5 backdrop-blur-md px-6 md:px-12 py-4 md:py-8 rounded-xl border border-white/10 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-white/20 flex items-center justify-center"
             >
               <img 
                 src={brand.logo}
                 alt={`${brand.name} logo`}
-                className={`object-contain filter brightness-0 invert opacity-90 hover:opacity-100 transition-all duration-300 transform hover:scale-105 ${
-                  brand.name === 'Boohoo' ? 'w-48 h-24' : // Increased size for Boohoo
-                  brand.name === 'Nike' ? 'w-44 h-20' :    // Increased size for Nike
-                  brand.name === 'TikTok' ? 'w-44 h-20' :  // Added specific size for TikTok
-                  'w-32 h-16'                              // Default size for other logos
-                }`}
+                className="w-24 h-12 md:w-32 md:h-16 object-contain filter brightness-0 invert opacity-90 hover:opacity-100 transition-all duration-300 transform hover:scale-105"
+                loading="eager"
+                onError={(e) => {
+                  console.error(`Failed to load logo for ${brand.name}`);
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             </div>
           ))}
@@ -1124,26 +1125,22 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-white mb-12 text-center animate-on-scroll">Upcoming Events</h2>
           <div className="grid grid-cols-1 gap-8 mt-16">
-            {events.map((event, i) => (
-              <div 
-                key={i} 
+            {events.map((event, index) => (
+              <div
+                key={index}
                 onClick={() => handleEventClick(event.link, event.type)}
                 className="animate-on-scroll relative bg-white/10 backdrop-blur-md rounded-md overflow-hidden hover:bg-white/20 transition-all duration-300 cursor-pointer border border-white/20 shadow-lg transform hover:scale-105 hover:shadow-xl mt-[100px]"
               >
                 {/* Image container positioned above the card */}
                 <div className="absolute -top-[100px] left-0 w-full h-[100px] overflow-hidden rounded-t-lg">
                   <div className="relative w-full h-full bg-white/5 backdrop-blur-[5px] border border-white/10">
-                  <img 
-                      src={i === 0 ? "/events/makeup-event-banner.jpg" : 
-                          i === 1 ? "/events/akess-event-banner.jpg" :
+                    <img 
+                      src={index === 0 ? "/events/makeup-event-banner.jpg" : 
+                          index === 1 ? "/events/akess-event-banner.jpg" :
                           "/events/coachella-event-banner.jpg"}
-                    alt={event.title}
+                      alt={event.title}
                       className="w-full h-full object-cover object-center opacity-90 hover:opacity-100 transition-opacity duration-300"
                       loading="eager"
-                      onError={(e) => {
-                        console.error('Error loading image:', e);
-                        e.currentTarget.style.display = 'none';
-                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1b1661]/20 to-[#1b1661]/90"></div>
                   </div>
@@ -1162,7 +1159,7 @@ function App() {
                   <p className="text-[#f5f4f4]/80 mb-4">{event.description}</p>
                   <button 
                     className="flex items-center gap-2 text-[#fd6d2b] hover:text-[#f34e02] transition-colors group"
-                    onClick={(e) => handleLearnMore(e, i)}
+                    onClick={(e) => handleLearnMore(e, index)}
                   >
                     Learn more <ChevronRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
                   </button>

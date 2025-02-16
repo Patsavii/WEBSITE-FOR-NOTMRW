@@ -1182,11 +1182,11 @@ function App() {
                   transform transition-all duration-500 ease-out
                   hover:scale-[1.02] hover:shadow-2xl
                   hover:border-[#fd6d2b]/30
-                  bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-md rounded-md"
+                  bg-gradient-to-br from-[#26208a]/80 to-[#312AB3]/80 backdrop-blur-md rounded-md"
               >
                 <div className="p-6 bg-transparent
                   transform transition-all duration-500 ease-out
-                  group-hover:bg-white/5">
+                  group-hover:bg-[#26208a]/40">
                   <div className="flex justify-between items-start mb-4">
                     <div className="transform transition-all duration-300 group-hover:translate-x-1">
                       <h3 className="text-xl font-semibold text-white group-hover:text-[#fd6d2b] transition-colors duration-300">
@@ -1202,7 +1202,7 @@ function App() {
                   <p className="text-[#f5f4f4] mb-4 transition-all duration-300 group-hover:translate-x-1">
                     {event.location}
                   </p>
-                  <p className="text-[#f5f4f4]/80 mb-4 transition-all duration-300 group-hover:text-[#f5f4f4] group-hover:translate-x-1">
+                  <p className="text-white/90 mb-4 transition-all duration-300 group-hover:text-white group-hover:translate-x-1">
                     {event.description}
                   </p>
                   <button 

@@ -865,9 +865,66 @@ function App() {
     }, 3000);
   };
 
+  // Update the Trusted By section
+  const TrustedBySection = () => {
+    const [scrollPosition, setScrollPosition] = useState(0);
+
+    useEffect(() => {
+      const animate = () => {
+        setScrollPosition(prev => {
+          // Create continuous smooth scrolling
+          const newPosition = prev + 0.1; // Adjust speed by changing this value
+          // Reset position when all brands have scrolled
+          return newPosition >= (trustedBrands.length * 100) ? 0 : newPosition;
+        });
+        requestAnimationFrame(animate);
+      };
+
+      const animationFrame = requestAnimationFrame(animate);
+      return () => cancelAnimationFrame(animationFrame);
+    }, []);
+
+    return (
+      <div className="bg-[#1b1661] py-16 overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1b1661] via-transparent to-[#1b1661] z-10"></div>
+        <h3 className="text-center text-[#f5f4f4] text-2xl mb-12 animate-on-scroll font-bold">
+          Trusted by Leading Brands
+        </h3>
+        <div className="max-w-6xl mx-auto relative">
+          <div 
+            className="flex gap-8 transition-transform duration-300 ease-linear"
+            style={{ 
+              transform: `translateX(-${scrollPosition}%)`,
+            }}
+          >
+            {[...trustedBrands, ...trustedBrands, ...trustedBrands, ...trustedBrands].map((brand, i) => (
+              <div 
+                key={i} 
+                className="flex-shrink-0 w-1/3 bg-white/5 backdrop-blur-md px-6 md:px-12 py-4 md:py-8 
+                  rounded-xl border border-white/10 shadow-lg hover:shadow-xl 
+                  transition-all duration-300 hover:border-white/20 
+                  flex items-center justify-center"
+              >
+                <img 
+                  src={brand.logo}
+                  alt={`${brand.name} logo`}
+                  className="w-24 h-12 md:w-32 md:h-16 object-contain 
+                    filter brightness-0 invert opacity-90 
+                    hover:opacity-100 transition-all duration-300 
+                    transform hover:scale-105"
+                  loading="eager"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#26208a] via-[#312AB3] to-[#f34e02] overflow-x-hidden">
-      <header className="fixed top-0 left-0 w-full z-50 transition-all duration-300" 
+    <div className="min-h-screen min-h-[-webkit-fill-available] bg-gradient-to-br from-[#26208a] via-[#312AB3] to-[#f34e02] overflow-x-hidden">
+      <header className="fixed top-0 left-0 w-full z-50 transition-all duration-300 pt-safe-top" 
               style={{ 
                 backgroundColor: `rgba(38, 32, 138, ${Math.min(scrollY / 500, 0.95)})`,
                 backdropFilter: `blur(${Math.min(scrollY / 100, 10)}px)`
@@ -1016,12 +1073,12 @@ function App() {
       )}
 
       {/* Hero Section */}
-      <div className="min-h-[100vh] relative overflow-hidden flex items-center justify-center py-32 md:py-24">
+      <div className="min-h-[100vh] min-h-[-webkit-fill-available] relative overflow-hidden flex items-center justify-center py-safe">
         <div className="absolute inset-0 bg-[#26208a]/30 backdrop-blur-sm"
              style={{ transform: `translateY(${scrollY * 0.5}px)` }}>
         </div>
-        <div className="relative z-10 max-w-6xl mx-auto text-center animate-on-scroll px-4">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-on-scroll pt-20">
+        <div className="relative z-10 max-w-6xl mx-auto text-center animate-on-scroll px-4 pt-safe">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-on-scroll">
             AI-Powered Creator Marketing
             <span className="block text-[#fd6d2b]">That Delivers Results</span>
           </h1>
@@ -1047,31 +1104,7 @@ function App() {
       </div>
 
       {/* Trusted By Section */}
-      <div className="bg-[#1b1661] py-16 overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1b1661] via-transparent to-[#1b1661] z-10"></div>
-        <h3 className="text-center text-[#f5f4f4] text-2xl mb-12 animate-on-scroll font-bold">
-          Trusted by Leading Brands
-        </h3>
-        <div ref={trustScroll} className="flex gap-8 md:gap-16 whitespace-nowrap overflow-hidden relative z-0 px-4 md:px-8">
-          {[...trustedBrands, ...trustedBrands].map((brand, i) => (
-            <div 
-              key={i} 
-              className="flex-shrink-0 bg-white/5 backdrop-blur-md px-6 md:px-12 py-4 md:py-8 rounded-xl border border-white/10 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-white/20 flex items-center justify-center"
-            >
-              <img 
-                src={brand.logo}
-                alt={`${brand.name} logo`}
-                className="w-24 h-12 md:w-32 md:h-16 object-contain filter brightness-0 invert opacity-90 hover:opacity-100 transition-all duration-300 transform hover:scale-105"
-                loading="eager"
-                onError={(e) => {
-                  console.error(`Failed to load logo for ${brand.name}`);
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      <TrustedBySection />
 
       {/* Gallery Section */}
       <div className="py-24 px-4" ref={galleryRef}>
@@ -1129,39 +1162,42 @@ function App() {
               <div
                 key={index}
                 onClick={() => handleEventClick(event.link, event.type)}
-                className="animate-on-scroll relative bg-white/10 backdrop-blur-md rounded-md overflow-hidden hover:bg-white/20 transition-all duration-300 cursor-pointer border border-white/20 shadow-lg transform hover:scale-105 hover:shadow-xl mt-[100px]"
+                className="animate-on-scroll relative bg-[rgba(255,255,255,0.1)] backdrop-blur-md rounded-md overflow-hidden 
+                  group cursor-pointer border border-white/20 shadow-lg mt-[100px]
+                  transform transition-all duration-500 ease-out
+                  hover:bg-[rgba(255,255,255,0.15)] hover:scale-[1.02] hover:shadow-2xl
+                  hover:border-[#fd6d2b]/30"
               >
-                {/* Image container positioned above the card */}
-                <div className="absolute -top-[100px] left-0 w-full h-[100px] overflow-hidden rounded-t-lg">
-                  <div className="relative w-full h-full bg-white/5 backdrop-blur-[5px] border border-white/10">
-                    <img 
-                      src={index === 0 ? "/events/makeup-event-banner.jpg" : 
-                          index === 1 ? "/events/akess-event-banner.jpg" :
-                          "/events/coachella-event-banner.jpg"}
-                      alt={event.title}
-                      className="w-full h-full object-cover object-center opacity-90 hover:opacity-100 transition-opacity duration-300"
-                      loading="eager"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1b1661]/20 to-[#1b1661]/90"></div>
-                  </div>
-                </div>
-
-                {/* Main content */}
-                <div className="p-6">
+                {/* Remove the image container and keep only the main content */}
+                <div className="p-6 bg-[rgba(255,255,255,0.1)] backdrop-blur-md
+                  transform transition-all duration-500 ease-out
+                  group-hover:bg-[rgba(255,255,255,0.15)]">
                   <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-white">{event.title}</h3>
-                      <p className="text-[#fd6d2b]">{event.date}</p>
+                    <div className="transform transition-all duration-300 group-hover:translate-x-1">
+                      <h3 className="text-xl font-semibold text-white group-hover:text-[#fd6d2b] transition-colors duration-300">
+                        {event.title}
+                      </h3>
+                      <p className="text-[#fd6d2b] transition-opacity duration-300 group-hover:opacity-90">
+                        {event.date}
+                      </p>
                     </div>
-                    <Calendar className="text-[#f34e02]" />
+                    <Calendar className="text-[#f34e02] transform transition-all duration-500 
+                      group-hover:scale-110 group-hover:rotate-12" />
                   </div>
-                  <p className="text-[#f5f4f4] mb-4">{event.location}</p>
-                  <p className="text-[#f5f4f4]/80 mb-4">{event.description}</p>
+                  <p className="text-[#f5f4f4] mb-4 transition-all duration-300 group-hover:translate-x-1">
+                    {event.location}
+                  </p>
+                  <p className="text-[#f5f4f4]/80 mb-4 transition-all duration-300 group-hover:text-[#f5f4f4] group-hover:translate-x-1">
+                    {event.description}
+                  </p>
                   <button 
-                    className="flex items-center gap-2 text-[#fd6d2b] hover:text-[#f34e02] transition-colors group"
+                    className="flex items-center gap-2 text-[#fd6d2b] transition-all duration-300 
+                      group-hover:text-[#f34e02] group-hover:translate-x-2"
                     onClick={(e) => handleLearnMore(e, index)}
                   >
-                    Learn more <ChevronRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
+                    Learn more 
+                    <ChevronRight size={16} className="transform transition-all duration-500 
+                      group-hover:translate-x-1 group-hover:scale-110" />
                   </button>
                 </div>
               </div>

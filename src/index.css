@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - 2rem));
+  }
+}
+
+.scroll-animation {
+  animation: scroll 30s linear infinite;
+}
+
+/* Fade in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Logo hover effect */
+.logo {
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.02);
+}
+
+.logo:hover h1 {
+  color: #fd6d2b;
+  transition: color 0.3s ease;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(253, 109, 43, 0.5);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(253, 109, 43, 0.8);
+}
+
+/* Chat interface custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(253, 109, 43, 0.3);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(253, 109, 43, 0.5);
+}
+
+/* Add these styles to your existing CSS */
+.font-space-grotesk {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* Add new styles for the trusted brands section */
+.trusted-brand-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.trusted-brand-container::before,
+.trusted-brand-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+  z-index: 20;
+}
+
+.trusted-brand-container::before {
+  left: 0;
+  background: linear-gradient(to right, #1b1661, transparent);
+}
+
+.trusted-brand-container::after {
+  right: 0;
+  background: linear-gradient(to left, #1b1661, transparent);
+}
+
+/* Add styles for consultation options */
+.consultation-option {
+  @apply bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-md transition-colors;
+}
+
+.consultation-form input {
+  @apply w-full px-4 py-2 rounded-md bg-white/5 border border-white/10 text-white focus:border-[#fd6d2b] transition-colors;
+}
+
+.consultation-form button {
+  @apply w-full bg-[#f34e02] hover:bg-[#fd6d2b] text-white px-4 py-2 rounded-md transition-colors;
+}

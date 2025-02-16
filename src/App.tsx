@@ -882,7 +882,7 @@ function App() {
 
       const animationFrame = requestAnimationFrame(animate);
       return () => cancelAnimationFrame(animationFrame);
-    }, []);
+  }, []);
 
     return (
       <div className="bg-[#1b1661] py-16 overflow-hidden relative">
@@ -923,12 +923,22 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen min-h-[-webkit-fill-available] bg-gradient-to-br from-[#26208a] via-[#312AB3] to-[#f34e02] overflow-x-hidden">
-      <header className="fixed top-0 left-0 w-full z-50 transition-all duration-300 pt-safe-top" 
-              style={{ 
-                backgroundColor: `rgba(38, 32, 138, ${Math.min(scrollY / 500, 0.95)})`,
-                backdropFilter: `blur(${Math.min(scrollY / 100, 10)}px)`
-              }}>
+    <div className="min-h-screen min-h-[100svh] bg-gradient-to-br from-[#26208a] via-[#312AB3] to-[#f34e02] overflow-x-hidden relative"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+      }}
+    >
+      <header 
+        className="fixed left-0 w-full z-50 transition-all duration-300" 
+        style={{ 
+          backgroundColor: `rgba(38, 32, 138, ${Math.min(scrollY / 500, 0.95)})`,
+          backdropFilter: `blur(${Math.min(scrollY / 100, 10)}px)`,
+          top: 'env(safe-area-inset-top, 0px)'
+        }}
+      >
         <div className="max-w-6xl mx-auto flex justify-between items-center p-4 md:p-6">
           <button 
             onClick={() => {
@@ -1073,11 +1083,16 @@ function App() {
       )}
 
       {/* Hero Section */}
-      <div className="min-h-[100vh] min-h-[-webkit-fill-available] relative overflow-hidden flex items-center justify-center py-safe">
+      <div className="min-h-[100svh] w-full relative overflow-hidden flex items-center justify-center"
+        style={{
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        }}
+      >
         <div className="absolute inset-0 bg-[#26208a]/30 backdrop-blur-sm"
              style={{ transform: `translateY(${scrollY * 0.5}px)` }}>
         </div>
-        <div className="relative z-10 max-w-6xl mx-auto text-center animate-on-scroll px-4 pt-safe">
+        <div className="relative z-10 max-w-6xl mx-auto text-center animate-on-scroll px-4 pt-[80px] md:pt-0">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-on-scroll">
             AI-Powered Creator Marketing
             <span className="block text-[#fd6d2b]">That Delivers Results</span>
@@ -1163,15 +1178,18 @@ function App() {
                 key={index}
                 onClick={() => handleEventClick(event.link, event.type)}
                 className="animate-on-scroll relative bg-[rgba(255,255,255,0.1)] backdrop-blur-md rounded-md overflow-hidden 
-                  group cursor-pointer border border-white/20 shadow-lg mt-[100px]
+                  group cursor-pointer border border-white/20 shadow-lg
                   transform transition-all duration-500 ease-out
                   hover:bg-[rgba(255,255,255,0.15)] hover:scale-[1.02] hover:shadow-2xl
                   hover:border-[#fd6d2b]/30"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(8px)'
+                }}
               >
-                {/* Remove the image container and keep only the main content */}
-                <div className="p-6 bg-[rgba(255,255,255,0.1)] backdrop-blur-md
+                <div className="p-6 bg-transparent
                   transform transition-all duration-500 ease-out
-                  group-hover:bg-[rgba(255,255,255,0.15)]">
+                  group-hover:bg-[rgba(255,255,255,0.05)]">
                   <div className="flex justify-between items-start mb-4">
                     <div className="transform transition-all duration-300 group-hover:translate-x-1">
                       <h3 className="text-xl font-semibold text-white group-hover:text-[#fd6d2b] transition-colors duration-300">

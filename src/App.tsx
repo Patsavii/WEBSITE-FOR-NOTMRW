@@ -1177,19 +1177,16 @@ function App() {
               <div
                 key={index}
                 onClick={() => handleEventClick(event.link, event.type)}
-                className="animate-on-scroll relative bg-[rgba(255,255,255,0.1)] backdrop-blur-md rounded-md overflow-hidden 
+                className="animate-on-scroll relative overflow-hidden 
                   group cursor-pointer border border-white/20 shadow-lg
                   transform transition-all duration-500 ease-out
-                  hover:bg-[rgba(255,255,255,0.15)] hover:scale-[1.02] hover:shadow-2xl
-                  hover:border-[#fd6d2b]/30"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(8px)'
-                }}
+                  hover:scale-[1.02] hover:shadow-2xl
+                  hover:border-[#fd6d2b]/30
+                  bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-md rounded-md"
               >
                 <div className="p-6 bg-transparent
                   transform transition-all duration-500 ease-out
-                  group-hover:bg-[rgba(255,255,255,0.05)]">
+                  group-hover:bg-white/5">
                   <div className="flex justify-between items-start mb-4">
                     <div className="transform transition-all duration-300 group-hover:translate-x-1">
                       <h3 className="text-xl font-semibold text-white group-hover:text-[#fd6d2b] transition-colors duration-300">

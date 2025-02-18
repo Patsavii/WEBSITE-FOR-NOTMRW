@@ -36,7 +36,19 @@ interface WebhookData {
     socialHandles?: string;
   };
   consultationData: {
-    [key: string]: string;
+    // Brand-specific fields
+    marketingGoals?: string;
+    influencerType?: string;
+    platforms?: string;
+    budget?: string;
+    industry?: string;
+    // Creator-specific fields
+    contentType?: string;
+    audienceSize?: string;
+    brandExperience?: string;
+    goals?: string;
+    followers?: string;
+    engagementRate?: string;
   };
   metadata: {
     userAgent: string;
@@ -44,7 +56,27 @@ interface WebhookData {
       local: string;
       utc: string;
     };
+    source: string;
+    version: string;
   };
+}
+
+// Add interface for form data structure
+interface ConsultationFormData {
+  name: string;
+  email: string;
+  phone: string;
+  company?: string;
+  marketingGoals?: string;
+  influencerType?: string;
+  platforms?: string;
+  budget?: string;
+  industry?: string;
+  contentType?: string;
+  audienceSize?: string;
+  brandExperience?: string;
+  goals?: string;
+  socialHandles?: string;
 }
 
 function App() {
@@ -313,32 +345,55 @@ function App() {
   const sendToWebhook = async (data: Partial<WebhookData>) => {
     try {
       const webhookData: WebhookData = {
-        ...data,
+        formType: data.formType || 'brand',
+        submissionId: generateSubmissionId(),
+        timestamp: new Date().toISOString(),
+        userInfo: {
+          name: data.userInfo?.name || '',
+          email: data.userInfo?.email || '',
+          phone: data.userInfo?.phone || '',
+          company: data.userInfo?.company,
+          socialHandles: data.userInfo?.socialHandles
+        },
+        consultationData: {
+          ...data.consultationData,
+        },
         metadata: {
           userAgent: navigator.userAgent,
           submissionTime: {
-            local: new Date().toString(),
+            local: new Date().toLocaleString(),
             utc: new Date().toUTCString()
-          }
+          },
+          source: 'website_consultation',
+          version: '1.0.0'
         }
-      } as WebhookData;
+      };
 
+      // Log the data being sent
       console.log('Sending webhook data:', JSON.stringify(webhookData, null, 2));
 
       const response = await fetch('https://hook.us2.make.com/jayb11t4hduccicghts2e351t2wf1bvi', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'User-Agent': 'Notmrw-Website/1.0',
         },
         body: JSON.stringify(webhookData)
       });
 
       if (!response.ok) {
-        throw new Error(`Webhook submission failed: ${response.statusText}`);
+        throw new Error(`Webhook submission failed: ${response.status} ${response.statusText}`);
       }
+
+      // Log the response
+      const responseData = await response.text();
+      console.log('Webhook response:', responseData);
+
+      return true;
     } catch (error) {
       console.error('Error sending data to webhook:', error);
-      // You might want to add error handling UI here
+      return false;
     }
   };
 
@@ -480,10 +535,10 @@ function App() {
   };
 
   // Update the handleCreatorFormSubmit function to send initial creator data
-  const handleCreatorFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreatorFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const initialCreatorData: Partial<WebhookData> = {
+    const webhookData: Partial<WebhookData> = {
       formType: 'creator',
       submissionId: generateSubmissionId(),
       timestamp: new Date().toISOString(),
@@ -494,26 +549,27 @@ function App() {
         socialHandles: formData.socialHandles
       },
       consultationData: {
-        niche: formData.niche,
         platforms: formData.platforms,
         followers: formData.followers,
-        engagementRate: formData.engagementRate,
-        contentTypes: formData.contentTypes
+        contentTypes: formData.contentTypes,
+        niche: formData.niche,
+        engagementRate: formData.engagementRate
       }
     };
 
-    // Send initial creator data
-    sendToWebhook(initialCreatorData);
-    
-    setShowForm(false);
-    setShowChat(true);
+    const success = await sendToWebhook(webhookData);
+    if (success) {
+      setShowForm(false);
+      setShowChat(true);
+      // Initialize AI consultation
+    }
   };
 
   // Update the handleBrandFormSubmit function to send initial brand data
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-
-    const initialBrandData: Partial<WebhookData> = {
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const webhookData: Partial<WebhookData> = {
       formType: 'brand',
       submissionId: generateSubmissionId(),
       timestamp: new Date().toISOString(),
@@ -528,15 +584,17 @@ function App() {
         budget: formData.budget,
         campaignGoals: formData.campaignGoals,
         targetAudience: formData.targetAudience,
-        currentMarketingChannels: formData.currentMarketingChannels
+        previousExperience: formData.previousInfluencerExperience,
+        marketingChannels: formData.currentMarketingChannels
       }
     };
 
-    // Send initial brand data
-    sendToWebhook(initialBrandData);
-
-    setShowForm(false);
-    setShowChat(true);
+    const success = await sendToWebhook(webhookData);
+    if (success) {
+      // Handle success (show success message, reset form, etc.)
+      setShowForm(false);
+      // Show success message
+    }
   };
 
   const handleUserTypeSelect = (type: UserType) => {
@@ -809,60 +867,60 @@ function App() {
     return userType === 'creator' ? creatorConsultationFlow : consultationFlow;
   };
 
-  // Add a new function to handle brand contact form submission
-  const handleBrandContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // Update AI consultation submission
+  const handleConsultationComplete = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formElement = e.currentTarget;
-    const formData = new FormData(formElement);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
 
-    // Get form values
-    const contactInfo = {
-      name: formData.get('fullname') as string,
-      email: formData.get('emailaddress') as string,
-      phone: formData.get('phonenumber') as string,
-      company: formData.get('companyname') as string
-    };
-
-    // Prepare final brand data
-    const brandData = {
-      formType: 'brand',
-      submissionId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: new Date().toISOString(),
-      userInfo: contactInfo,
-      consultationData: {
-        marketingGoals: consultationData.marketingGoals || '',
-        influencerType: consultationData.influencerType || '',
-        platforms: consultationData.platforms || '',
-        budget: consultationData.budget || '',
-        industry: consultationData.industry || ''
+    const webhookData: Partial<WebhookData> = {
+      formType: userType || 'brand',
+      userInfo: {
+        name: formData.get('fullname') as string,
+        email: formData.get('emailaddress') as string,
+        phone: formData.get('phonenumber') as string,
+        company: userType === 'brand' ? (formData.get('companyname') as string) : undefined,
+        socialHandles: userType === 'creator' ? consultationData.socialHandles : undefined
+      },
+      consultationData: userType === 'brand' ? {
+        marketingGoals: consultationData.marketingGoals,
+        influencerType: consultationData.influencerType,
+        platforms: consultationData.platforms,
+        budget: consultationData.budget,
+        industry: consultationData.industry
+      } : {
+        contentType: consultationData.contentType,
+        platforms: consultationData.platforms,
+        audienceSize: consultationData.audienceSize,
+        brandExperience: consultationData.brandExperience,
+        goals: consultationData.goals,
+        followers: formData.get('followers') as string,
+        engagementRate: formData.get('engagementrate') as string
       }
     };
 
-    // Send data to webhook
-    try {
-      fetch('https://hook.us2.make.com/jayb11t4hduccicghts2e351t2wf1bvi', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(brandData)
-      });
-    } catch (error) {
-      console.error('Error sending data:', error);
+    const success = await sendToWebhook(webhookData);
+
+    if (success) {
+      setMessages(prev => [...prev, {
+        text: userType === 'brand' 
+          ? "Thank you! Our team will review your information and contact you within 24 hours to discuss your custom influencer marketing strategy. 🌟"
+          : "Thank you! Our creator success team will review your profile and reach out within 24 hours to discuss partnership opportunities. 🌟",
+        sender: 'ai',
+        timestamp: new Date()
+      }]);
+
+      setTimeout(() => {
+        setShowChat(false);
+        setCurrentStep('introduction');
+      }, 3000);
+    } else {
+      setMessages(prev => [...prev, {
+        text: "I apologize, but there was an error submitting your information. Please try again or contact our support team directly at support@notmrw.net 🙏",
+        sender: 'ai',
+        timestamp: new Date()
+      }]);
     }
-
-    // Show thank you message
-    setMessages(prev => [...prev, {
-      text: "Thank you for sharing your information! Our team will be in touch within 24 hours to discuss your custom influencer marketing strategy. Have a great day! 🐝✨",
-      sender: 'ai',
-      timestamp: new Date()
-    }]);
-
-    // Close chat after delay
-    setTimeout(() => {
-      setShowChat(false);
-      setCurrentStep('introduction');
-    }, 3000);
   };
 
   // Update the Trusted By section
@@ -1388,7 +1446,7 @@ function App() {
                     ))}
                   </div>
                 ) : (
-                  <form onSubmit={handleBrandContactSubmit} className="space-y-4 mt-4">
+                  <form onSubmit={handleConsultationComplete} className="space-y-4 mt-4">
                     {getCurrentFlow().contactInfo.fields.map((field, index) => (
                       <input
                         key={index}
@@ -1397,6 +1455,7 @@ function App() {
                         placeholder={field}
                         className="w-full px-4 py-2 rounded-md bg-white/5 border border-white/10 text-white"
                         required
+                        aria-label={field}
                       />
                     ))}
                     <button
